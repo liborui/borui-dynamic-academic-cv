@@ -1,0 +1,48 @@
+---
+title: "Research publication summary"
+author: "Marie Skłodowska-Curie"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  pdf_document: default
+abstract: |
+  (Mostly) Automatically generated summary of the academic/publishing curriculum.
+myId: EmD_lTEAAAAJ
+myPronoun: her
+---
+
+```{r setup,echo=FALSE,message=FALSE}
+require(scholar)
+myId <- rmarkdown::metadata$myId
+myProfile <- get_profile(myId)
+myPapers <- get_publications(myId)
+
+```
+
+Currently, `r rmarkdown::metadata$myPronoun` Google Scholar profile includes `r length(myPapers$title)` papers, with a total of `r myProfile$total_cites` citations, and an `h` number of `r myProfile$h_index`.
+
+The paper with the most citations is [`r myPapers$title[1]`](`r get_article_scholar_url(myId,myPapers$pubid[1])`), with `r myPapers$cites[1]` cites.
+
+Evolution of paper citations during the last few years is shown below.
+
+```{r citation,echo=FALSE,message=FALSE}
+history <- get_citation_history(myId)
+library(ggplot2)
+library(ggthemes)
+last_year <- tail(history,n=2)
+ggplot(history, aes(x=year,y=cites))+ geom_line()+ geom_point()+geom_line(data=last_year, aes(x=year,y=cites,color="Year so far"))+geom_point(data=last_year, aes(x=year,y=cites,color="Year so far"))+theme_tufte()
+```
+
+In the last 5 years, these have been the papers with the most citations
+
+```{r last5,,echo=FALSE,message=FALSE}
+library(dplyr)
+thisYear <- as.integer(format(Sys.Date(), "%Y"))
+papers.last5 <- myPapers[ between(myPapers$year,thisYear-5,thisYear), ]
+mostCitations <- head(papers.last5[order(papers.last5$cites, decreasing = T),],5)
+knitr::kable(mostCitations %>% select(title,cites,year), row.names = F)
+```
+
+## Acknowledgements
+
+This CV has been created from [a dynamic academic CV template](https://github.com/JJ/dynamic-academic-cv-template), which is released under the [Affero GPL license](https://www.gnu.org/licenses/agpl-3.0.en.html). Make your own by instantiating the template.
